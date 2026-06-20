@@ -1,37 +1,38 @@
-# Main auto-type static library
+# Autotype plugin sources
 set(autotype_SOURCES
-        AutoType.cpp
-        AutoTypeAction.cpp
-        AutoTypeMatchModel.cpp
-        AutoTypeMatchView.cpp
-        AutoTypeSelectDialog.cpp
-        PickcharsDialog.cpp
-        WindowSelectComboBox.cpp)
+    AutoType.cpp
+    AutoTypeSelectDialog.cpp
+    AutoTypeSelectView.cpp
+    AutoTypeMatchModel.cpp
+    AutoTypeMatchView.cpp
+)
 
-add_library(autotype STATIC ${autotype_SOURCES})
-target_link_libraries(autotype Qt6::Core Qt6::Widgets)
+set(autotype_MOC_SOURCES
+    AutoType.h
+    AutoTypeSelectDialog.h
+    AutoTypeSelectView.h
+    AutoTypeMatchModel.h
+    AutoTypeMatchView.h
+)
 
-# Platform specific auto-type implementations
-if(UNIX AND NOT APPLE AND NOT HAIKU)
-    if(WITH_X11)
-        find_package(X11 REQUIRED COMPONENTS Xi XTest)
-        if(PRINT_SUMMARY)
-            add_feature_info(libXi X11_Xi_FOUND "The X11 Xi Protocol library is required for auto-type")
-            add_feature_info(libXtst X11_XTest_FOUND "The X11 XTEST Protocol library is required for auto-type")
-            add_feature_info(Qt6X11Extras Qt6X11Extras_FOUND "The Qt6X11Extras library is required for auto-type")
-        endif()
+# Generate Qt MOC files
+qt5_wrap_cpp(autotype_MOC_SOURCES ${autotype_MOC_SOURCES})
 
-        add_subdirectory(xcb)
-    endif()
+# Create autotype library
+add_library(autotype STATIC ${autotype_SOURCES} ${autotype_MOC_SOURCES})
 
-    add_subdirectory(wayland)
-elseif(APPLE)
-    add_subdirectory(mac)
-elseif(WIN32)
-    add_subdirectory(windows)
-endif()
+# Include directories
+target_include_directories(autotype PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/src
+    ${Qt5Core_INCLUDE_DIRS}
+    ${Qt5Gui_INCLUDE_DIRS}
+    ${Qt5Widgets_INCLUDE_DIRS}
+)
 
-# Auto-type tests
-if(WITH_TESTS)
-    add_subdirectory(test)
-endif()
+# Link libraries
+target_link_libraries(autotype
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+)

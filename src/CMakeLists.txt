@@ -1,598 +1,562 @@
-#  Copyright (C) 2026 KeePassXC Team <team@keepassxc.org>
-#  Copyright (C) 2010 Felix Geyer <debfx@fobos.de>
-#
-#  This program is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 2 or (at your option)
-#  version 3 of the License.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-
-set(core_SOURCES
-        core/Alloc.cpp
-        core/AutoTypeAssociations.cpp
-        core/Base32.cpp
-        core/Bootstrap.cpp
-        core/Clock.cpp
-        core/Config.cpp
-        core/CustomData.cpp
-        core/Database.cpp
-        core/DatabaseStats.cpp
-        core/Entry.cpp
-        core/EntryAttachments.cpp
-        core/EntryAttributes.cpp
-        core/EntrySearcher.cpp
-        core/FileWatcher.cpp
-        core/Group.cpp
-        core/HibpOffline.cpp
-        core/InactivityTimer.cpp
-        core/Merger.cpp
-        core/Metadata.cpp
-        core/ModifiableObject.cpp
-        core/PasswordGenerator.cpp
-        core/PasswordHealth.cpp
-        core/PassphraseGenerator.cpp
-        core/Resources.cpp
-        core/SignalMultiplexer.cpp
-        core/TimeDelta.cpp
-        core/TimeInfo.cpp
-        core/Tools.cpp
-        core/Totp.cpp
-        core/Translator.cpp
-        cli/Utils.cpp
-        cli/TextStream.cpp
-        crypto/Crypto.cpp
-        crypto/CryptoHash.cpp
-        crypto/Random.cpp
-        crypto/SymmetricCipher.cpp
-        crypto/kdf/Kdf.cpp
-        crypto/kdf/AesKdf.cpp
-        crypto/kdf/Argon2Kdf.cpp
-        format/BitwardenReader.cpp
-        format/CsvExporter.cpp
-        format/CsvParser.cpp
-        format/HtmlExporter.cpp
-        format/KeePass1Reader.cpp
-        format/KeePass2.cpp
-        format/KeePass2RandomStream.cpp
-        format/KdbxReader.cpp
-        format/KdbxWriter.cpp
-        format/KdbxXmlReader.cpp
-        format/KeePass2Reader.cpp
-        format/KeePass2Writer.cpp
-        format/Kdbx3Reader.cpp
-        format/Kdbx3Writer.cpp
-        format/Kdbx4Reader.cpp
-        format/Kdbx4Writer.cpp
-        format/KdbxXmlWriter.cpp
-        format/OpData01.cpp
-        format/OPUXReader.cpp
-        format/OpVaultReader.cpp
-        format/OpVaultReaderAttachments.cpp
-        format/OpVaultReaderBandEntry.cpp
-        format/OpVaultReaderSections.cpp
-        format/ProtonPassReader.cpp
-        keys/CompositeKey.cpp
-        keys/FileKey.cpp
-        keys/PasswordKey.cpp
-        keys/ChallengeResponseKey.cpp
-        keys/drivers/YubiKey.h
-        keys/drivers/YubiKey.cpp
-        keys/drivers/YubiKeyInterface.cpp
-        keys/drivers/YubiKeyInterfaceUSB.cpp
-        keys/drivers/YubiKeyInterfacePCSC.cpp
-        streams/HashedBlockStream.cpp
-        streams/HashingStream.cpp
-        streams/HmacBlockStream.cpp
-        streams/LayeredStream.cpp
-        streams/qtiocompressor.cpp
-        streams/StoreDataStream.cpp
-        streams/SymmetricCipherStream.cpp)
-
-set(gui_SOURCES
-        gui/styles/styles.qrc
-        gui/styles/StateColorPalette.cpp
-        gui/styles/base/phantomcolor.cpp
-        gui/styles/base/BaseStyle.cpp
-        gui/styles/dark/DarkStyle.cpp
-        gui/styles/light/LightStyle.cpp
-        gui/AboutDialog.cpp
-        gui/ActionCollection.cpp
-        gui/Application.cpp
-        gui/CategoryListWidget.cpp
-        gui/Clipboard.cpp
-        gui/CloneDialog.cpp
-        gui/DatabaseIcons.cpp
-        gui/DatabaseOpenWidget.cpp
-        gui/DatabaseTabWidget.cpp
-        gui/DatabaseWidget.cpp
-        gui/DatabaseWidgetStateSync.cpp
-        gui/EntryPreviewWidget.cpp
-        gui/DialogyWidget.cpp
-        gui/EditWidget.cpp
-        gui/EditWidgetIcons.cpp
-        gui/EditWidgetProperties.cpp
-        gui/FileDialog.cpp
-        gui/Font.cpp
-        gui/GuiTools.cpp
-        gui/HtmlGuiExporter.cpp
-        gui/IconModels.cpp
-        gui/KMessageWidget.cpp
-        gui/MainWindow.cpp
-        gui/MergeDialog.cpp
-        gui/MessageBox.cpp
-        gui/MessageWidget.cpp
-        gui/PasswordWidget.cpp
-        gui/PasswordGeneratorWidget.cpp
-        gui/ApplicationSettingsWidget.cpp
-        gui/Icons.cpp
-        gui/SearchWidget.cpp
-        gui/SettingsWidget.cpp
-        gui/SortFilterHideProxyModel.cpp
-        gui/SquareSvgWidget.cpp
-        gui/ShortcutSettingsPage.cpp
-        gui/TotpSetupDialog.cpp
-        gui/TotpDialog.cpp
-        gui/TotpExportSettingsDialog.cpp
-        gui/DatabaseOpenDialog.cpp
-        gui/URLEdit.cpp
-        gui/UrlTools.cpp
-        gui/WelcomeWidget.cpp
-        gui/csvImport/CsvImportWidget.cpp
-        gui/csvImport/CsvParserModel.cpp
-        gui/entry/AutoTypeAssociationsModel.cpp
-        gui/entry/EditEntryWidget.cpp
-        gui/entry/EntryAttachmentsModel.cpp
-        gui/entry/EntryAttachmentsWidget.cpp
-        gui/entry/EntryAttributesModel.cpp
-        gui/entry/EditEntryAttachmentsDialog.cpp
-        gui/entry/PreviewEntryAttachmentsDialog.cpp
-        gui/entry/attachments/TextAttachmentsWidget.cpp
-        gui/entry/attachments/ImageAttachmentsWidget.cpp
-        gui/entry/attachments/ImageAttachmentsView.cpp
-        gui/entry/attachments/TextAttachmentsPreviewWidget.cpp
-        gui/entry/attachments/TextAttachmentsEditWidget.cpp
-        gui/entry/attachments/AttachmentWidget.cpp
-        gui/entry/EntryHistoryModel.cpp
-        gui/entry/EntryModel.cpp
-        gui/entry/EntryView.cpp
-        gui/export/ExportDialog.cpp
-        gui/group/EditGroupWidget.cpp
-        gui/group/GroupModel.cpp
-        gui/group/GroupView.cpp
-        gui/tag/TagModel.cpp
-        gui/tag/TagView.cpp
-        gui/tag/TagsEdit.cpp
-        gui/databasekey/KeyComponentWidget.cpp
-        gui/databasekey/PasswordEditWidget.cpp
-        gui/databasekey/YubiKeyEditWidget.cpp
-        gui/databasekey/KeyFileEditWidget.cpp
-        gui/dbsettings/DatabaseSettingsWidget.cpp
-        gui/dbsettings/DatabaseSettingsDialog.cpp
-        gui/dbsettings/DatabaseSettingsWidgetGeneral.cpp
-        gui/dbsettings/DatabaseSettingsWidgetMaintenance.cpp
-        gui/dbsettings/DatabaseSettingsWidgetMetaDataSimple.cpp
-        gui/dbsettings/DatabaseSettingsWidgetEncryption.cpp
-        gui/dbsettings/DatabaseSettingsWidgetDatabaseKey.cpp
-        gui/remote/DatabaseSettingsWidgetRemote.cpp
-        gui/remote/RemoteHandler.cpp
-        gui/remote/RemoteProcess.cpp
-        gui/remote/RemoteSettings.cpp
-        gui/reports/ReportsWidget.cpp
-        gui/reports/ReportsDialog.cpp
-        gui/reports/ReportsWidgetHealthcheck.cpp
-        gui/reports/ReportsPageHealthcheck.cpp
-        gui/reports/ReportsWidgetHibp.cpp
-        gui/reports/ReportsPageHibp.cpp
-        gui/reports/ReportsWidgetStatistics.cpp
-        gui/reports/ReportsPageStatistics.cpp
-        gui/osutils/DeviceListener.cpp
-        gui/osutils/OSUtilsBase.cpp
-        gui/osutils/ScreenLockListener.cpp
-        gui/osutils/ScreenLockListenerPrivate.cpp
-        gui/widgets/ElidedLabel.cpp
-        gui/widgets/KPToolBar.cpp
-        gui/widgets/PopupHelpWidget.cpp
-        gui/widgets/ShortcutWidget.cpp
-        gui/wizard/ImportWizard.cpp
-        gui/wizard/ImportWizardPageReview.cpp
-        gui/wizard/ImportWizardPageSelect.cpp
-        gui/wizard/NewDatabaseWizard.cpp
-        gui/wizard/NewDatabaseWizardPage.cpp
-        gui/wizard/NewDatabaseWizardPageMetaData.cpp
-        gui/wizard/NewDatabaseWizardPageEncryption.cpp
-        gui/wizard/NewDatabaseWizardPageDatabaseKey.cpp
-        quickunlock/QuickUnlockInterface.cpp
-        ../share/icons/icons.qrc
-        ../share/wizard/wizard.qrc)
-
-if(APPLE)
-    list(APPEND gui_SOURCES
-            gui/osutils/macutils/DeviceListenerMac.cpp
-            gui/osutils/macutils/MacPasteboard.cpp
-            gui/osutils/macutils/MacUtils.cpp
-            gui/osutils/macutils/ScreenLockListenerMac.cpp
-            gui/osutils/macutils/AppKitImpl.mm
-            gui/osutils/macutils/AppKit.h
-            quickunlock/TouchID.mm)
-
-    # TODO: Remove -Wno-error once deprecation warnings have been resolved.
-    set_source_files_properties(quickunlock/TouchID.mm PROPERTY COMPILE_FLAGS "-Wno-old-style-cast")
-endif()
-
-if(UNIX AND NOT APPLE)
-    list(APPEND gui_SOURCES
-            gui/osutils/nixutils/DesktopPortal.cpp
-            gui/osutils/nixutils/DeviceListenerLibUsb.cpp
-            gui/osutils/nixutils/GlobalShortcutsPortal.cpp
-            gui/osutils/nixutils/NixUtils.cpp
-            gui/osutils/nixutils/RemoteDesktopPortal.cpp
-            gui/osutils/nixutils/ScreenLockListenerDBus.cpp
-    )
-    if("${CMAKE_SYSTEM}" MATCHES "Linux")
-        list(APPEND core_SOURCES
-                quickunlock/Polkit.cpp
-                quickunlock/PolkitDbusTypes.cpp)
-    endif()
-    if(WITH_X11)
-        list(APPEND gui_SOURCES
-            gui/osutils/nixutils/X11Funcs.cpp)
-    endif()
-    qt6_add_dbus_adaptor(gui_SOURCES
-            gui/org.keepassxc.KeePassXC.MainWindow.xml
-            gui/MainWindow.h
-            MainWindow)
-
-    set_source_files_properties(
-        quickunlock/dbus/org.freedesktop.PolicyKit1.Authority.xml
-        PROPERTIES
-        INCLUDE "quickunlock/PolkitDbusTypes.h"
-        )
-    qt6_add_dbus_interface(core_SOURCES
-        quickunlock/dbus/org.freedesktop.PolicyKit1.Authority.xml
-        polkit_dbus
-    )
-    qt6_add_dbus_interface(core_SOURCES
-        gui/osutils/nixutils/dbus/org.freedesktop.portal.Request.xml
-        xdp_request
-    )
-    qt6_add_dbus_interface(core_SOURCES
-        gui/osutils/nixutils/dbus/org.freedesktop.portal.Session.xml
-        xdp_session
-    )
-    qt6_add_dbus_interface(core_SOURCES
-        gui/osutils/nixutils/dbus/org.freedesktop.portal.GlobalShortcuts.xml
-        xdp_globalshortcuts
-    )
-    qt6_add_dbus_interface(core_SOURCES
-        gui/osutils/nixutils/dbus/org.freedesktop.portal.RemoteDesktop.xml
-        xdp_remotedesktop
-    )
-    qt6_add_dbus_interface(core_SOURCES
-        gui/osutils/nixutils/dbus/org.freedesktop.portal.Clipboard.xml
-        xdp_clipboard
-    )
-endif()
-
-if(WIN32)
-    list(APPEND gui_SOURCES
-            gui/osutils/winutils/DeviceListenerWin.cpp
-            gui/osutils/winutils/ScreenLockListenerWin.cpp
-            gui/osutils/winutils/WinUtils.cpp)
-    if (WINSDK)
-        list(APPEND gui_SOURCES quickunlock/WindowsHello.cpp)
-    endif()
-endif()
-
-add_subdirectory(browser)
-add_subdirectory(proxy)
-if(KPXC_FEATURE_BROWSER)
-    set(browser_LIB browser)
-    list(APPEND gui_SOURCES
-            gui/dbsettings/DatabaseSettingsWidgetBrowser.cpp
-            gui/entry/EntryURLModel.cpp
-            gui/reports/ReportsPageBrowserStatistics.cpp
-            gui/reports/ReportsPagePasskeys.cpp
-            gui/reports/ReportsWidgetBrowserStatistics.cpp
-            gui/reports/ReportsWidgetPasskeys.cpp
-            gui/passkeys/PasskeyExporter.cpp
-            gui/passkeys/PasskeyExportDialog.cpp
-            gui/passkeys/PasskeyImporter.cpp
-            gui/passkeys/PasskeyImportDialog.cpp)
-endif()
-
-if(KPXC_FEATURE_NETWORK)
-    list(APPEND gui_SOURCES
-            networking/HibpDownloader.cpp
-            networking/NetworkManager.cpp
-            networking/UpdateChecker.cpp
-            gui/UpdateCheckDialog.cpp
-            gui/IconDownloader.cpp
-            gui/IconDownloaderDialog.cpp)
-endif()
-
-add_subdirectory(cli)
-add_subdirectory(thirdparty)
-
-add_subdirectory(autotype)
-set(autotype_LIB autotype)
-
-# TODO: Refactor to gui sources
-add_subdirectory(qrcode)
-set(qrcode_LIB qrcode)
-
-# TODO: Move to gui sources on refactor
-add_subdirectory(keeshare)
-set(keeshare_LIB keeshare)
-
-add_subdirectory(sshagent)
-if(KPXC_FEATURE_SSHAGENT)
-    set(sshagent_LIB sshagent)
-endif()
-
-add_subdirectory(fdosecrets)
-if(KPXC_FEATURE_FDOSECRETS)
-    set(fdosecrets_LIB fdosecrets)
-endif()
-
-configure_file(config-keepassx.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-keepassx.h)
-configure_file(git-info.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/git-info.h)
-
-# SVG Widgets
-find_package(Qt6 REQUIRED COMPONENTS SvgWidgets)
-
-# Core Library Definition
-add_library(keepassxc_core STATIC ${core_SOURCES})
-target_compile_definitions(keepassxc_core PRIVATE KPXC_BUILDING_CORE)
-target_link_libraries(keepassxc_core 
-        ${qrcode_LIB}
-        Qt6::Core
-        Qt6::Concurrent
-        ${BOTAN_LIBRARIES}
-        ${PCSC_LIBRARIES}
-        ${ZXCVBN_LIBRARIES}
-        ${ZLIB_LIBRARIES}
-        ${MINIZIP_LIBRARIES}
-        ${thirdparty_LIBRARIES})
-
-# GUI Library Definition
-add_library(keepassxc_gui STATIC ${gui_SOURCES})
-target_compile_definitions(keepassxc_gui PRIVATE KPXC_BUILDING_CORE)
-target_link_libraries(keepassxc_gui
-        keepassxc_core
-        Qt6::Network
-        Qt6::SvgWidgets
-        Qt6::Widgets
-        ${autotype_LIB}
-        ${browser_LIB}
-        ${fdosecrets_LIB}
-        ${keeshare_LIB}
-        ${sshagent_LIB})
-
-if(APPLE)
-    target_link_libraries(keepassxc_gui "-framework Foundation -framework AppKit -framework Carbon -framework Security -framework LocalAuthentication -framework ScreenCaptureKit")
-    if(Qt6MacExtras_FOUND)
-        target_link_libraries(keepassxc_gui Qt6::MacExtras)
-    endif()
-endif()
-if(HAIKU)
-    target_link_libraries(keepassxc_gui network)
-endif()
-if(UNIX AND NOT APPLE)
-    target_link_libraries(keepassxc_core Qt6::DBus ${LIBUSB_LIBRARIES})
-    if("${CMAKE_SYSTEM}" MATCHES "Linux")
-        target_link_libraries(keepassxc_core ${KEYUTILS_LIBRARIES})
-    endif()
-    if(WITH_X11)
-        target_link_libraries(keepassxc_gui X11)
-    endif()
-endif()
-if(WIN32)
-    target_link_libraries(keepassxc_gui Wtsapi32.lib Ws2_32.lib)
-    if (WINSDK)
-        target_link_libraries(keepassxc_gui WindowsApp.lib)
-    endif()
-endif()
-
-# Main Executable Definition
-add_executable(${PROGNAME} main.cpp)
-target_link_libraries(${PROGNAME} keepassxc_gui)
-set_target_properties(${PROGNAME} PROPERTIES ENABLE_EXPORTS ON)
-
-if(WIN32)
-    set_target_properties(${PROGNAME} PROPERTIES WIN32_EXECUTABLE ON)
-    include(GenerateProductVersion)
-    generate_product_version(
-            WIN32_ResourceFiles
-            NAME "KeePassXC"
-            COMPANY_NAME "KeePassXC Team"
-            VERSION_MAJOR ${KEEPASSXC_VERSION_MAJOR}
-            VERSION_MINOR ${KEEPASSXC_VERSION_MINOR}
-            VERSION_PATCH ${KEEPASSXC_VERSION_PATCH}
-    )
-    list(APPEND WIN32_ResourceFiles "${CMAKE_SOURCE_DIR}/share/windows/icon.rc")
-    target_sources(${PROGNAME} PUBLIC ${WIN32_ResourceFiles})
-
-elseif(APPLE AND WITH_APP_BUNDLE)
-    set(MACOSX_BUNDLE_IDENTIFIER org.keepassxc.keepassxc)
-    set(MACOSX_BUNDLE_ICON_NAME keepassxc)
-    set(MACOSX_BUNDLE_APPLE_ENTITLEMENTS "${CMAKE_SOURCE_DIR}/share/macosx/keepassxc.entitlements")
-    configure_file("${CMAKE_SOURCE_DIR}/share/macosx/Info.plist.cmake" ${CMAKE_CURRENT_BINARY_DIR}/Info.plist)
-    install(FILES "${CMAKE_SOURCE_DIR}/share/macosx/embedded.provisionprofile" DESTINATION ${BUNDLE_INSTALL_DIR})
-    set(MACOSX_BUNDLE_RESOURCE_FILES
-            "${CMAKE_SOURCE_DIR}/share/macosx/Assets.car"
-            "${CMAKE_SOURCE_DIR}/share/macosx/keepassxc.icns"
-    )
-    set_target_properties(${PROGNAME} PROPERTIES
-            MACOSX_BUNDLE ON
-            MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_BINARY_DIR}/Info.plist"
-            CPACK_BUNDLE_APPLE_ENTITLEMENTS "${MACOSX_BUNDLE_APPLE_ENTITLEMENTS}"
-            RESOURCE "${MACOSX_BUNDLE_RESOURCE_FILES}"
-    )
-    target_sources(${PROGNAME} PUBLIC ${MACOSX_BUNDLE_RESOURCE_FILES})
-
-    if(QT_MAC_USE_COCOA AND EXISTS "${QT_LIBRARY_DIR}/Resources/qt_menu.nib")
-        install(DIRECTORY "${QT_LIBRARY_DIR}/Resources/qt_menu.nib"
-                DESTINATION "${DATA_INSTALL_DIR}")
-    endif()
-
-    # Sign binaries
-    if(WITH_XC_CODESIGN_IDENTITY)
-        configure_file("${CMAKE_SOURCE_DIR}/cmake/MacOSCodesign.cmake.in" "${CMAKE_BINARY_DIR}/MacOSCodesign.cmake" @ONLY)
-        set(CPACK_PRE_BUILD_SCRIPTS "${CMAKE_BINARY_DIR}/MacOSCodesign.cmake")
-        if(WITH_XC_NOTARY_KEYCHAIN_PROFILE)
-            configure_file("${CMAKE_SOURCE_DIR}/cmake/MacOSCodesign.cmake.in" "${CMAKE_BINARY_DIR}/MacOSCodesign.cmake" @ONLY)
-            set(CPACK_POST_BUILD_SCRIPTS "${CMAKE_BINARY_DIR}/MacOSCodesign.cmake")
-        else()
-            message(INFO "Do not forget to notarize DMG package before distribution!")
-        endif()
-    endif()
-
-    set(CPACK_GENERATOR "DragNDrop")
-    set(CPACK_DMG_FORMAT "UDBZ")
-    set(CPACK_DMG_DS_STORE "${CMAKE_SOURCE_DIR}/share/macosx/DS_Store.in")
-    set(CPACK_DMG_BACKGROUND_IMAGE "${CMAKE_SOURCE_DIR}/share/macosx/background.tiff")
-    set(CPACK_DMG_VOLUME_NAME "${PROGNAME}")
-    set(CPACK_SYSTEM_NAME "OSX")
-    set(CPACK_STRIP_FILES ON)
-    set(CPACK_PACKAGE_FILE_NAME "${PROGNAME}-${KEEPASSXC_VERSION}")
-    include(CPack)
-endif()
-
-install(TARGETS ${PROGNAME}
-        BUNDLE DESTINATION . COMPONENT Runtime
-        RUNTIME DESTINATION ${BIN_INSTALL_DIR} COMPONENT Runtime)
-
-# Windows Installer Definition
-if(WIN32)
-    # Deploy used libraries into build directory for debugging
-    add_custom_command(TARGET ${PROGNAME} POST_BUILD
-        COMMAND ${WINDEPLOYQT_EXE}
-            --dir $<TARGET_FILE_DIR:${PROGNAME}>
-            $<IF:$<CONFIG:Debug>,--debug,--release>
-            $<TARGET_FILE:${PROGNAME}>)
-
-    # We have to copy the license file in the configuration phase.
-    # CMake checks that CPACK_RESOURCE_FILE_LICENSE actually exists and
-    # we have to copy it because WiX needs it to have a .txt extension.
-    execute_process(COMMAND ${CMAKE_COMMAND} -E copy
-            "${CMAKE_SOURCE_DIR}/LICENSE.GPL-2"
-            "${CMAKE_CURRENT_BINARY_DIR}/INSTALLER_LICENSE.txt")
-
-    # Prepare post-install script and set to run prior to building cpack installers
-    configure_file("${CMAKE_SOURCE_DIR}/cmake/WindowsCodesign.cmake.in" "${CMAKE_BINARY_DIR}/WindowsCodesign.cmake" @ONLY)
-    set(CPACK_PRE_BUILD_SCRIPTS "${CMAKE_BINARY_DIR}/WindowsCodesign.cmake")
-    set(CPACK_POST_BUILD_SCRIPTS "${CMAKE_BINARY_DIR}/WindowsCodesign.cmake")
-
-    string(REGEX REPLACE "-.*$" "" KEEPASSXC_VERSION_CLEAN ${KEEPASSXC_VERSION})
-
-    set(CPACK_GENERATOR "ZIP;WIX")
-    set(CPACK_COMPONENTS_ALL "")
-    set(CPACK_STRIP_FILES OFF)
-    set(CPACK_PACKAGE_FILE_NAME "${PROGNAME}-${KEEPASSXC_VERSION}-${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
-    set(CPACK_PACKAGE_INSTALL_DIRECTORY ${PROGNAME})
-    set(CPACK_PACKAGE_VERSION ${KEEPASSXC_VERSION_CLEAN})
-    set(CPACK_PACKAGE_VENDOR "${PROGNAME} Team")
-    set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_BINARY_DIR}/INSTALLER_LICENSE.txt")
-    set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
-    set(CPACK_NSIS_MUI_ICON "${CMAKE_SOURCE_DIR}/share/windows/keepassxc.ico")
-    set(CPACK_NSIS_MUI_UNIICON "${CPACK_NSIS_MUI_ICON}")
-    set(CPACK_NSIS_INSTALLED_ICON_NAME "\\\\${PROGNAME}.exe")
-    set(CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP "${CMAKE_SOURCE_DIR}/share/windows/installer-wizard.png")
-    set(CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP "${CMAKE_SOURCE_DIR}/share/windows/installer-wizard.png")
-    set(CPACK_NSIS_CREATE_ICONS_EXTRA "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${PROGNAME}.lnk' '$INSTDIR\\\\${PROGNAME}.exe'")
-    set(CPACK_NSIS_DELETE_ICONS_EXTRA "Delete '$SMPROGRAMS\\\\$START_MENU\\\\${PROGNAME}.lnk'")
-    set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS "ExecWait 'Taskkill /IM KeePassXC.exe'")
-    set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS "${CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS}\nExecWait 'Taskkill /IM keepassxc-proxy.exe /F'")
-    set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "ExecWait 'Taskkill /IM KeePassXC.exe'")
-    set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "${CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS}\nExecWait 'Taskkill /IM keepassxc-proxy.exe /F'")
-    set(CPACK_NSIS_URL_INFO_ABOUT "https://keepassxc.org")
-    set(CPACK_NSIS_DISPLAY_NAME ${PROGNAME})
-    set(CPACK_NSIS_PACKAGE_NAME "${PROGNAME} v${KEEPASSXC_VERSION}")
-    set(CPACK_NSIS_MUI_FINISHPAGE_RUN "../${PROGNAME}.exe")
-    set(CPACK_WIX_UPGRADE_GUID 88785A72-3EAE-4F29-89E3-BC6B19BA9A5B)
-    set(CPACK_WIX_PRODUCT_ICON "${CMAKE_SOURCE_DIR}/share/windows/keepassxc.ico")
-    set(CPACK_WIX_UI_BANNER "${CMAKE_SOURCE_DIR}/share/windows/installer-banner.png")
-    set(CPACK_WIX_UI_DIALOG "${CMAKE_SOURCE_DIR}/share/windows/installer-wizard.png")
-    set(CPACK_WIX_UI_REF "KPXC_InstallDir")
-    set(CPACK_WIX_TEMPLATE "${CMAKE_SOURCE_DIR}/share/windows/wix-template.xml")
-    set(CPACK_WIX_PATCH_FILE "${CMAKE_SOURCE_DIR}/share/windows/wix-patch.xml")
-    set(CPACK_WIX_EXTRA_SOURCES
-            "${CMAKE_SOURCE_DIR}/share/windows/KPXC_InstallDir.wxs"
-            "${CMAKE_SOURCE_DIR}/share/windows/KPXC_InstallDirDlg.wxs"
-            "${CMAKE_SOURCE_DIR}/share/windows/KPXC_ExitDlg.wxs")
-    set(CPACK_WIX_PROPERTY_ARPURLINFOABOUT  "https://keepassxc.org")
-    set(CPACK_WIX_EXTENSIONS "WixUtilExtension.dll")
-    include(CPack)
-
+# Source files for KeePassXC
+set(keepassx_SOURCES
+    core/Database.cpp
+    core/DatabaseIcons.cpp
+    core/DatabaseWidget.cpp
+    core/Entry.cpp
+    core/EntryAttachments.cpp
+    core/EntryAttributes.cpp
+    core/Group.cpp
+    core/Metadata.cpp
+    core/TimeDelta.cpp
+    core/TimeInfo.cpp
+    core/Uuid.cpp
+    core/AutoTypeAssociations.cpp
+    core/AutoTypeMatch.cpp
+    core/Config.cpp
+    core/CustomData.cpp
+    core/Bootstrap.cpp
+    core/Global.cpp
+    core/Tools.cpp
+    core/FileWatcher.cpp
+    core/FilePath.cpp
+    core/IconDownloader.cpp
+    core/OpenSSHKey.cpp
+    core/AsyncTask.cpp
+    core/Clock.cpp
+    core/HibpOffline.cpp
+    core/NetworkManager.cpp
+    core/Statistics.cpp
+    core/Totp.cpp
+    core/PasswordHealth.cpp
+    core/PassphraseGenerator.cpp
+    core/PasswordGenerator.cpp
+    core/CharacterSubstitutions.cpp
+    core/Base32.cpp
+    core/Base64.cpp
+    core/QCodeArea.cpp
+    core/qrcode/BitBuffer.cpp
+    core/qrcode/QrCode.cpp
+    core/qrcode/QrSegment.cpp
     
-    # Use windeployqt.exe to setup Qt dependencies
-    install(CODE "
-        if(\"\${CMAKE_INSTALL_CONFIG_NAME}\" STREQUAL \"Debug\")
-            set(_wdqt_mode --debug)
-        else()
-            set(_wdqt_mode --release)
-        endif()
-        execute_process(
-            COMMAND ${WINDEPLOYQT_EXE} ${PROGNAME}.exe \${_wdqt_mode}
-            WORKING_DIRECTORY \${CMAKE_INSTALL_PREFIX}
-            OUTPUT_QUIET
-            RESULT_VARIABLE _wdqt_result
-        )
-        if(NOT \${_wdqt_result} EQUAL 0)
-            message(FATAL_ERROR \"windeployqt failed with exit code \${_wdqt_result}\")
-        endif()"
-        COMPONENT Runtime)
+    keys/CompositeKey.cpp
+    keys/CompositeKey_p.h
+    keys/FileKey.cpp
+    keys/PasswordKey.cpp
+    keys/ChallengeResponseKey.cpp
+    keys/drivers/ChallengeResponseKeyInterface.cpp
+    keys/drivers/YubiKeyInterface.cpp
+    keys/drivers/YubiKeyInterfacePCSC.cpp
+    keys/drivers/YubiKeyInterfaceUSB.cpp
+    keys/drivers/FingerprintKey.cpp
+    
+    streams/HashedBlockStream.cpp
+    streams/HmacBlockStream.cpp
+    streams/LayeredStream.cpp
+    streams/qcompressor.cpp
+    streams/StoreDataStream.cpp
+    streams/QtIOCompressor.cpp
+    
+    format/KeePass2.cpp
+    format/KeePass2RandomStream.cpp
+    format/KeePass2XmlReader.cpp
+    format/KeePass2XmlWriter.cpp
+    format/KeePass2Repair.cpp
+    format/Kdbx3Reader.cpp
+    format/Kdbx3Writer.cpp
+    format/Kdbx4Reader.cpp
+    format/Kdbx4Writer.cpp
+    format/KdbxXmlReader.cpp
+    format/KdbxXmlWriter.cpp
+    format/KdbxDatabase.cpp
+    
+    crypto/CryptoHash.cpp
+    crypto/Crypto.cpp
+    crypto/SymmetricCipher.cpp
+    crypto/SymmetricCipherGcrypt.cpp
+    crypto/SymmetricCipherBackend.cpp
+    crypto/CryptoManager.cpp
+    crypto/kdf/Kdf.cpp
+    crypto/kdf/KdfFactory.cpp
+    crypto/kdf/AesKdf.cpp
+    crypto/kdf/Argon2Kdf.cpp
+    crypto/kdf/Argon2Kdf_p.h
+    
+    crypto/keys/FileKeyChallenge.cpp
+    
+    icons/KeePassXCIcons.cpp
+    
+    zlib/zlib.h
+    zlib/adler32.c
+    zlib/compress.c
+    zlib/crc32.c
+    zlib/deflate.c
+    zlib/gzclose.c
+    zlib/gzlib.c
+    zlib/gzread.c
+    zlib/gzwrite.c
+    zlib/infback.c
+    zlib/inffast.c
+    zlib/inflate.c
+    zlib/inftrees.c
+    zlib/trees.c
+    zlib/uncompr.c
+    zlib/zutil.c
+)
 
-    if(NOT VCPKG_INSTALLED_DIR)
-        install(CODE "set(gp_tool \"objdump\")" COMPONENT Runtime)
+set(keepassx_SOURCES ${keepassx_SOURCES}
+    # Autotype
+    autotype/AutoType.cpp
+    autotype/AutoTypePlatformPlugin.h
+    autotype/AutoTypeSelectDialog.cpp
+    autotype/AutoTypeSelectDialog.h
+    autotype/AutoTypeSelectView.cpp
+    autotype/AutoTypeSelectView.h
+    autotype/AutoTypeMatchModel.cpp
+    autotype/AutoTypeMatchModel.h
+    autotype/AutoTypeMatchView.cpp
+    autotype/AutoTypeMatchView.h
+    
+    # Browser integration
+    browser/BrowserService.cpp
+    browser/BrowserService.h
+    browser/BrowserSettings.cpp
+    browser/BrowserSettings.h
+    browser/BrowserHost.cpp
+    browser/BrowserHost.h
+    browser/BrowserMessage.cpp
+    browser/BrowserMessage.h
+    browser/BrowserAction.cpp
+    browser/BrowserAction.h
+    browser/BrowserEntryConfig.cpp
+    browser/BrowserEntryConfig.h
+    browser/BrowserEntryMatcher.cpp
+    browser/BrowserEntryMatcher.h
+    
+    # CLI
+    cli/Utils.cpp
+    cli/Utils.h
+    cli/TextStream.cpp
+    cli/TextStream.h
+    cli/DatabaseTabs.cpp
+    cli/DatabaseTabs.h
+    cli/KeepassxcCli.cpp
+    cli/KeepassxcCli.h
+    
+    # GUI
+    gui/DatabaseWidget.cpp
+    gui/DatabaseWidget.h
+    gui/DatabaseTabWidget.cpp
+    gui/DatabaseTabWidget.h
+    gui/MainWindow.cpp
+    gui/MainWindow.h
+    gui/AboutDialog.cpp
+    gui/AboutDialog.h
+    gui/SettingsWidget.cpp
+    gui/SettingsWidget.h
+    gui/MainWindow.ui
+    gui/SettingsWidget.ui
+    gui/entry/EntryView.cpp
+    gui/entry/EntryView.h
+    gui/entry/EntryModel.cpp
+    gui/entry/EntryModel.h
+    gui/entry/EditEntryWidget.cpp
+    gui/entry/EditEntryWidget.h
+    gui/entry/EditEntryWidget.ui
+    gui/group/GroupView.cpp
+    gui/group/GroupView.h
+    gui/group/GroupModel.cpp
+    gui/group/GroupModel.h
+    gui/group/EditGroupWidget.cpp
+    gui/group/EditGroupWidget.h
+    gui/group/EditGroupWidget.ui
+    gui/IconModels.cpp
+    gui/IconModels.h
+    gui/KeePass1OpenWidget.cpp
+    gui/KeePass1OpenWidget.h
+    gui/KeePass1OpenWidget.ui
+    gui/KMessageWidget.cpp
+    gui/KMessageWidget.h
+    gui/MessageBox.cpp
+    gui/MessageBox.h
+    gui/PasswordEdit.cpp
+    gui/PasswordEdit.h
+    gui/PasswordGeneratorWidget.cpp
+    gui/PasswordGeneratorWidget.h
+    gui/PasswordGeneratorWidget.ui
+    gui/PasswordWidget.cpp
+    gui/PasswordWidget.h
+    gui/WelcomeWidget.cpp
+    gui/WelcomeWidget.h
+    gui/WelcomeWidget.ui
+    gui/DatabaseOpenWidget.cpp
+    gui/DatabaseOpenWidget.h
+    gui/DatabaseOpenWidget.ui
+    gui/csvImport/CsvImportWidget.cpp
+    gui/csvImport/CsvImportWidget.h
+    gui/csvImport/CsvImportWidget.ui
+    gui/csvImport/CsvImportWizard.cpp
+    gui/csvImport/CsvImportWizard.h
+    gui/csvImport/CsvParserModel.cpp
+    gui/csvImport/CsvParserModel.h
+    gui/keys/KeyFileEditWidget.cpp
+    gui/keys/KeyFileEditWidget.h
+    gui/keys/KeyFileEditWidget.ui
+    gui/keys/PasswordEditWidget.cpp
+    gui/keys/PasswordEditWidget.h
+    gui/keys/PasswordEditWidget.ui
+    gui/keys/ChallengeResponseEditWidget.cpp
+    gui/keys/ChallengeResponseEditWidget.h
+    gui/keys/ChallengeResponseEditWidget.ui
+    gui/keys/FingerprintEditWidget.cpp
+    gui/keys/FingerprintEditWidget.h
+    gui/keys/FingerprintEditWidget.ui
+    gui/dbsettings/DatabaseSettingsWidget.cpp
+    gui/dbsettings/DatabaseSettingsWidget.h
+    gui/dbsettings/DatabaseSettingsWidgetGeneral.cpp
+    gui/dbsettings/DatabaseSettingsWidgetGeneral.h
+    gui/dbsettings/DatabaseSettingsWidgetGeneral.ui
+    gui/dbsettings/DatabaseSettingsWidgetEncryption.cpp
+    gui/dbsettings/DatabaseSettingsWidgetEncryption.h
+    gui/dbsettings/DatabaseSettingsWidgetEncryption.ui
+    gui/dbsettings/DatabaseSettingsWidgetBrowserIntegration.cpp
+    gui/dbsettings/DatabaseSettingsWidgetBrowserIntegration.h
+    gui/dbsettings/DatabaseSettingsWidgetBrowserIntegration.ui
+    gui/dbsettings/DatabaseSettingsWidgetMaintenance.cpp
+    gui/dbsettings/DatabaseSettingsWidgetMaintenance.h
+    gui/dbsettings/DatabaseSettingsWidgetMaintenance.ui
+    gui/dbsettings/DatabaseSettingsWidgetRemote.cpp
+    gui/dbsettings/DatabaseSettingsWidgetRemote.cpp
+    gui/dbsettings/DatabaseSettingsWidgetRemote.h
+    gui/dbsettings/DatabaseSettingsWidgetRemote.ui
+    gui/reports/ReportsWidget.cpp
+    gui/reports/ReportsWidget.h
+    gui/reports/ReportsWidget.ui
+    gui/reports/ReportsWidgetHealthcheck.cpp
+    gui/reports/ReportsWidgetHealthcheck.h
+    gui/reports/ReportsWidgetHealthcheck.ui
+    gui/reports/ReportsWidgetStatistics.cpp
+    gui/reports/ReportsWidgetStatistics.h
+    gui/reports/ReportsWidgetStatistics.ui
+    gui/reports/ReportsWidgetBrowserStatistics.cpp
+    gui/reports/ReportsWidgetBrowserStatistics.h
+    gui/reports/ReportsWidgetBrowserStatistics.ui
+    gui/reports/ReportsWidgetHibp.cpp
+    gui/reports/ReportsWidgetHibp.h
+    gui/reports/ReportsWidgetHibp.ui
+    gui/wizard/NewDatabaseWizard.cpp
+    gui/wizard/NewDatabaseWizard.h
+    gui/wizard/NewDatabaseWizardPage.cpp
+    gui/wizard/NewDatabaseWizardPage.h
+    gui/wizard/NewDatabaseWizardPageSetup.cpp
+    gui/wizard/NewDatabaseWizardPageSetup.h
+    gui/wizard/NewDatabaseWizardPageSetup.ui
+    gui/wizard/NewDatabaseWizardPageEncryption.cpp
+    gui/wizard/NewDatabaseWizardPageEncryption.h
+    gui/wizard/NewDatabaseWizardPageEncryption.ui
+    gui/wizard/NewDatabaseWizardPageMasterKey.cpp
+    gui/wizard/NewDatabaseWizardPageMasterKey.h
+    gui/wizard/NewDatabaseWizardPageMasterKey.ui
+    
+    # Network
+    network/NetworkManager.cpp
+    network/NetworkManager.h
+    network/HibpDownloader.cpp
+    network/HibpDownloader.h
+    network/IconDownloader.cpp
+    network/IconDownloader.h
+    
+    # Streams
+    streams/HashedBlockStream.cpp
+    streams/HmacBlockStream.cpp
+    streams/LayeredStream.cpp
+    streams/qcompressor.cpp
+    streams/StoreDataStream.cpp
+    streams/QtIOCompressor.cpp
+)
 
-        # Deploy all 3rd party library dependencies first
-        install(CODE "include(BundleUtilities)
-                      fixup_bundle(\"\${CMAKE_INSTALL_PREFIX}/${PROGNAME}.exe\" \"\" \"\")"
-                COMPONENT Runtime)
+# Qt MOC sources
+set(keepassx_MOC_SOURCES
+    core/Database.h
+    core/DatabaseWidget.h
+    core/Entry.h
+    core/Group.h
+    core/Metadata.h
+    core/Config.h
+    core/CustomData.h
+    core/FilePath.h
+    core/FileWatcher.h
+    core/IconDownloader.h
+    core/NetworkManager.h
+    core/AsyncTask.h
+    core/HibpOffline.h
+    core/Totp.h
+    
+    keys/CompositeKey.h
+    keys/FileKey.h
+    keys/PasswordKey.h
+    keys/ChallengeResponseKey.h
+    keys/drivers/ChallengeResponseKeyInterface.h
+    keys/drivers/YubiKeyInterface.h
+    keys/drivers/YubiKeyInterfacePCSC.h
+    keys/drivers/YubiKeyInterfaceUSB.h
+    keys/drivers/FingerprintKey.h
+    
+    autotype/AutoType.h
+    autotype/AutoTypeSelectDialog.h
+    autotype/AutoTypeSelectView.h
+    autotype/AutoTypeMatchModel.h
+    autotype/AutoTypeMatchView.h
+    
+    browser/BrowserService.h
+    browser/BrowserSettings.h
+    browser/BrowserHost.h
+    browser/BrowserMessage.h
+    browser/BrowserAction.h
+    browser/BrowserEntryConfig.h
+    browser/BrowserEntryMatcher.h
+    
+    cli/Utils.h
+    cli/TextStream.h
+    cli/DatabaseTabs.h
+    cli/KeepassxcCli.h
+    
+    gui/DatabaseWidget.h
+    gui/DatabaseTabWidget.h
+    gui/MainWindow.h
+    gui/AboutDialog.h
+    gui/SettingsWidget.h
+    gui/entry/EntryView.h
+    gui/entry/EntryModel.h
+    gui/entry/EditEntryWidget.h
+    gui/group/GroupView.h
+    gui/group/GroupModel.h
+    gui/group/EditGroupWidget.h
+    gui/IconModels.h
+    gui/KeePass1OpenWidget.h
+    gui/KMessageWidget.h
+    gui/MessageBox.h
+    gui/PasswordEdit.h
+    gui/PasswordGeneratorWidget.h
+    gui/PasswordWidget.h
+    gui/WelcomeWidget.h
+    gui/DatabaseOpenWidget.h
+    gui/csvImport/CsvImportWidget.h
+    gui/csvImport/CsvImportWizard.h
+    gui/csvImport/CsvParserModel.h
+    gui/keys/KeyFileEditWidget.h
+    gui/keys/PasswordEditWidget.h
+    gui/keys/ChallengeResponseEditWidget.h
+    gui/keys/FingerprintEditWidget.h
+    gui/dbsettings/DatabaseSettingsWidget.h
+    gui/dbsettings/DatabaseSettingsWidgetGeneral.h
+    gui/dbsettings/DatabaseSettingsWidgetEncryption.h
+    gui/dbsettings/DatabaseSettingsWidgetBrowserIntegration.h
+    gui/dbsettings/DatabaseSettingsWidgetMaintenance.h
+    gui/dbsettings/DatabaseSettingsWidgetRemote.h
+    gui/reports/ReportsWidget.h
+    gui/reports/ReportsWidgetHealthcheck.h
+    gui/reports/ReportsWidgetStatistics.h
+    gui/reports/ReportsWidgetBrowserStatistics.h
+    gui/reports/ReportsWidgetHibp.h
+    gui/wizard/NewDatabaseWizard.h
+    gui/wizard/NewDatabaseWizardPage.h
+    gui/wizard/NewDatabaseWizardPageSetup.h
+    gui/wizard/NewDatabaseWizardPageEncryption.h
+    gui/wizard/NewDatabaseWizardPageMasterKey.h
+    
+    network/NetworkManager.h
+    network/HibpDownloader.h
+    network/IconDownloader.h
+)
 
-        # install OpenSSL library
-        if(KPXC_FEATURE_NETWORK)
-            find_file(OPENSSL_DLL
-                    NAMES libssl-3.dll libssl-3-x64.dll
-                    HINTS "${OPENSSL_ROOT_DIR}/bin"
-                    )
-            if (NOT OPENSSL_DLL)
-                message(FATAL_ERROR "Cannot find libssl dll, ensure openssl is properly installed.")
-            endif()
+# UI files
+set(keepassx_FORMS
+    gui/MainWindow.ui
+    gui/SettingsWidget.ui
+    gui/entry/EditEntryWidget.ui
+    gui/group/EditGroupWidget.ui
+    gui/KeePass1OpenWidget.ui
+    gui/PasswordGeneratorWidget.ui
+    gui/WelcomeWidget.ui
+    gui/DatabaseOpenWidget.ui
+    gui/csvImport/CsvImportWidget.ui
+    gui/keys/KeyFileEditWidget.ui
+    gui/keys/PasswordEditWidget.ui
+    gui/keys/ChallengeResponseEditWidget.ui
+    gui/keys/FingerprintEditWidget.ui
+    gui/dbsettings/DatabaseSettingsWidgetGeneral.ui
+    gui/dbsettings/DatabaseSettingsWidgetEncryption.ui
+    gui/dbsettings/DatabaseSettingsWidgetBrowserIntegration.ui
+    gui/dbsettings/DatabaseSettingsWidgetMaintenance.ui
+    gui/dbsettings/DatabaseSettingsWidgetRemote.ui
+    gui/reports/ReportsWidget.ui
+    gui/reports/ReportsWidgetHealthcheck.ui
+    gui/reports/ReportsWidgetStatistics.ui
+    gui/reports/ReportsWidgetBrowserStatistics.ui
+    gui/reports/ReportsWidgetHibp.ui
+    gui/wizard/NewDatabaseWizardPageSetup.ui
+    gui/wizard/NewDatabaseWizardPageEncryption.ui
+    gui/wizard/NewDatabaseWizardPageMasterKey.ui
+)
 
-            find_file(CRYPTO_DLL
-                    NAMES libcrypto-3.dll libcrypto-3-x64.dll
-                    HINTS "${OPENSSL_ROOT_DIR}/bin"
-                    )
-            if (NOT CRYPTO_DLL)
-                message(FATAL_ERROR "Cannot find libcrypto dll, ensure openssl is properly installed.")
-            endif()
+# Resources
+set(keepassx_RESOURCES
+    ${CMAKE_SOURCE_DIR}/share/icons/icons.qrc
+    ${CMAKE_SOURCE_DIR}/share/translations/translations.qrc
+    ${CMAKE_SOURCE_DIR}/share/welcomescreen/welcomescreen.qrc
+    ${CMAKE_SOURCE_DIR}/share/icons/icons_kdbx.qrc
+)
 
-            install(FILES ${OPENSSL_DLL} ${CRYPTO_DLL} DESTINATION ".")
-        endif()
-    endif()
+# Include directories
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_BINARY_DIR}/src
+    ${Qt5Core_INCLUDE_DIRS}
+    ${Qt5Gui_INCLUDE_DIRS}
+    ${Qt5Widgets_INCLUDE_DIRS}
+    ${Qt5Network_INCLUDE_DIRS}
+    ${BOTAN_INCLUDE_DIRS}
+    ${ZLIB_INCLUDE_DIRS}
+    ${ARGON2_INCLUDE_DIRS}
+    ${ZXCVBN_INCLUDE_DIRS}
+)
 
-    # install CA cert chains
-    find_file(SSL_CA_BUNDLE ca-bundle.crt PATHS "${Qt6_PREFIX}/ssl/certs")
-    if(SSL_CA_BUNDLE)
-        install(FILES ${SSL_CA_BUNDLE} DESTINATION "ssl/certs")
-    else()
-        file(DOWNLOAD "https://curl.se/ca/cacert.pem" "${CMAKE_BINARY_DIR}/ca-bundle.crt" TLS_VERIFY ON)
-        install(FILES "${CMAKE_BINARY_DIR}/ca-bundle.crt" DESTINATION "ssl/certs")
-    endif()
-
+# Add optional include directories
+if(QR_ENCODE_FOUND)
+    include_directories(${QR_ENCODE_INCLUDE_DIRS})
 endif()
 
-# The install commands in this subdirectory will be executed after all the install commands in the
-# current scope are ran. It is required for correct functioning of macdeployqt.
-add_subdirectory(post_install)
+if(READLINE_FOUND)
+    include_directories(${READLINE_INCLUDE_DIRS})
+endif()
+
+if(PCSC_FOUND)
+    include_directories(${PCSC_INCLUDE_DIRS})
+endif()
+
+if(FINGERPRINT_FOUND)
+    include_directories(${FINGERPRINT_INCLUDE_DIRS})
+endif()
+
+if(MINIZIP_FOUND)
+    include_directories(${MINIZIP_INCLUDE_DIRS})
+endif()
+
+# Generate Qt MOC files
+qt5_wrap_cpp(keepassx_MOC_SOURCES ${keepassx_MOC_SOURCES})
+
+# Generate UI files
+qt5_wrap_ui(keepassx_FORMS ${keepassx_FORMS})
+
+# Generate resource files
+qt5_add_resources(keepassx_RESOURCES_RCC ${keepassx_RESOURCES})
+
+# Set library dependencies
+set(keepassx_LIBS
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
+    Qt5::Network
+    ${BOTAN_LIBRARIES}
+    ${ZLIB_LIBRARIES}
+    ${ARGON2_LIBRARIES}
+    ${ZXCVBN_LIBRARIES}
+)
+
+# Add optional libraries
+if(QR_ENCODE_FOUND)
+    list(APPEND keepassx_LIBS ${QR_ENCODE_LIBRARIES})
+endif()
+
+if(READLINE_FOUND)
+    list(APPEND keepassx_LIBS ${READLINE_LIBRARIES})
+endif()
+
+if(PCSC_FOUND)
+    list(APPEND keepassx_LIBS ${PCSC_LIBRARIES})
+endif()
+
+if(FINGERPRINT_FOUND)
+    list(APPEND keepassx_LIBS ${FINGERPRINT_LIBRARIES})
+endif()
+
+if(MINIZIP_FOUND)
+    list(APPEND keepassx_LIBS ${MINIZIP_LIBRARIES})
+endif()
+
+# Create the main executable
+add_executable(keepassxc
+    ${keepassx_SOURCES}
+    ${keepassx_MOC_SOURCES}
+    ${keepassx_FORMS}
+    ${keepassx_RESOURCES_RCC}
+    main.cpp
+)
+
+# Link libraries
+target_link_libraries(keepassxc ${keepassx_LIBS})
+
+# Set compile definitions
+target_compile_definitions(keepassxc PRIVATE
+    -DQT_NO_KEYWORDS
+    -DQT_NO_CAST_TO_ASCII
+    -DQT_NO_CAST_FROM_ASCII
+    -DQT_NO_CAST_FROM_BYTEARRAY
+    -DQT_NO_URL_CAST_FROM_STRING
+    -DQT_USE_QSTRINGBUILDER
+)
+
+# Add optional compile definitions
+if(QR_ENCODE_FOUND)
+    target_compile_definitions(keepassxc PRIVATE -DHAVE_QRCODE)
+endif()
+
+if(READLINE_FOUND)
+    target_compile_definitions(keepassxc PRIVATE -DHAVE_READLINE)
+endif()
+
+if(PCSC_FOUND)
+    target_compile_definitions(keepassxc PRIVATE -DHAVE_PCSC)
+endif()
+
+if(FINGERPRINT_FOUND)
+    target_compile_definitions(keepassxc PRIVATE -DHAVE_FINGERPRINT)
+endif()
+
+if(MINIZIP_FOUND)
+    target_compile_definitions(keepassxc PRIVATE -DHAVE_MINIZIP)
+endif()
+
+# Install executable
+install(TARGETS keepassxc
+    BUNDLE DESTINATION .
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+# Create man pages
+if(UNIX AND NOT APPLE)
+    install(FILES share/linux/org.keepassxc.KeePassXC.desktop
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/applications
+    )
+    
+    install(FILES share/linux/org.keepassxc.KeePassXC.appdata.xml
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/metainfo
+    )
+    
+    install(FILES share/linux/org.keepassxc.KeePassXC.svg
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps
+    )
+endif()
+
+# Create translations
+if(${Qt5LinguistTools_FOUND})
+    add_subdirectory(share/translations)
+endif()
+
+# Add tests
+if(BUILD_TESTS)
+    add_subdirectory(tests)
+endif()
